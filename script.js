@@ -1,27 +1,79 @@
-document.getElementById('ageForm').addEventListener('submit',function(e){
-    e.preventDefault();
+const form = document.getElementById("ageForm");
+const resetBtn = document.getElementById("resetBtn");
+const resultSection = document.getElementById("result");
 
-    const d = parseInt(document.getElementById('day').value,10) ;
-    const m = parseInt(document.getElementById('month').value,10)
-    const y = parseInt(document.getElementById('year').value,10);
+form.addEventListener("submit", function (e) {
+  e.preventDefault();
 
-    const result = document.getElementById('result');
-    result.classList.remove('error');
-    result.textContent='';
+  const day = parseInt(document.getElementById("day").value);
+  const month = parseInt(document.getElementById("month").value);
+  const year = parseInt(document.getElementById("year").value);
 
-    if(!d || !m || !y){
-        result.classList.add('error');
-        result.textContent='Fill all fields.';
-        return;
+  resultSection.innerHTML = "";
 
-    }
+  if (!day || !month || !year) {
+    resultSection.innerHTML = `<div class="alert alert-danger">Please fill all fields</div>`;
+    return;
+  }
 
-    if(m<1 || m>12 || d<1 || d>31){
-        result.classList.add('error')
-        result.textContent='Enter a valid day and month';
-        return;
-    }
+  const birthDate = new Date(year, month - 1, day);
+  const today = new Date();
 
-    
-})
+  if (birthDate > today) {
+    resultSection.innerHTML = `<div class="alert alert-danger">Date cannot be in the future</div>`;
+    return;
+  }
 
+  let years = today.getFullYear() - birthDate.getFullYear();
+  let months = today.getMonth() - birthDate.getMonth();
+  let days = today.getDate() - birthDate.getDate();
+
+  if (days < 0) {
+    months--;
+    const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+    days += lastMonth.getDate();
+  }
+
+  if (months < 0) {
+    years--;
+    months += 12;
+  }
+
+  const totalDays = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24));
+  const totalWeeks = Math.floor(totalDays / 7);
+  const totalHours = totalDays * 24;
+
+  resultSection.innerHTML = `
+  <div class="card mt-4 p-4 text-center shadow">
+    <h4>Your Age</h4>
+
+    <div class="row mt-3">
+      <div class="col">
+        <h2>${years}</h2>
+        <small>Years</small>
+      </div>
+
+      <div class="col">
+        <h2>${months}</h2>
+        <small>Months</small>
+      </div>
+
+      <div class="col">
+        <h2>${days}</h2>
+        <small>Days</small>
+      </div>
+    </div>
+
+    <hr>
+
+    <p>Total Days: <b>${totalDays}</b></p>
+    <p>Total Weeks: <b>${totalWeeks}</b></p>
+    <p>Total Hours: <b>${totalHours}</b></p>
+  </div>
+  `;
+});
+
+resetBtn.addEventListener("click", () => {
+  form.reset();
+  resultSection.innerHTML = "";
+});
